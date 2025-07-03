@@ -1,0 +1,44 @@
+a.xpm-highlight{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    z-index: 999;
+    cursor: pointer;
+    border: 0px;
+    background: #007373;
+	color:#fff;
+    padding: 10px;
+    border-radius: 5px;
+    height: 40px;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+	opacity:0
+}
+
+
+a.xpm-highlight span{
+    color:#ffffff;
+    font-size: 16px;
+}
+body[data-page-id]:hover > a.xpm-highlight,
+main[data-page-id]:hover > a.xpm-highlight,
+div[data-page-id]:hover > a.xpm-highlight,
+div[data-component-id]:hover a.xpm-highlight, 
+ul[data-component-id]:hover a.xpm-highlight, 
+article[data-component-id]:hover a.xpm-highlight, 
+section[data-component-id]:hover a.xpm-highlight,
+ol[data-component-id]:hover a.xpm-highlight{
+    display: flex;
+	opacity:1
+}
+
+.pageroot > div[data-region] > div {
+	position:relative;
+}
+
+div[data-component-id]:hover, article[data-component-id]:hover, section[data-component-id]:hover, ul[data-component-id]:hover, ol[data-component-id]:hover{
+	border: 2px solid #17c13e !important;
+    box-shadow: 0 0 0 1px #17c13e;
+}
