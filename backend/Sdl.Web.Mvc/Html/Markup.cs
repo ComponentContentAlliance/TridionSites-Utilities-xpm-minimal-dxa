@@ -11,6 +11,8 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Extensions;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.ContentManager;
+using System.Web.UI;
+using System.ComponentModel;
 
 namespace Sdl.Web.Mvc.Html
 {
@@ -36,7 +38,7 @@ namespace Sdl.Web.Mvc.Html
                 return index;
             }
 
-            internal static XpmMarkupMap Current 
+            internal static XpmMarkupMap Current
             {
                 get
                 {
@@ -62,7 +64,7 @@ namespace Sdl.Web.Mvc.Html
         {
             using (new Tracer(markupDecoratorType))
             {
-                IMarkupDecorator markupDecorator = (IMarkupDecorator) markupDecoratorType.CreateInstance();
+                IMarkupDecorator markupDecorator = (IMarkupDecorator)markupDecoratorType.CreateInstance();
                 _markupDecorators.Add(markupDecorator);
             }
         }
@@ -94,27 +96,31 @@ namespace Sdl.Web.Mvc.Html
             }
         }
 
+
         /// <summary>
         /// Generates semantic markup (HTML/RDFa attributes) for a given Entity Model.
         /// </summary>
         /// <param name="entityModel">The Entity Model.</param>
-        /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
+        /// <returns>The semantic markup (HTML/RDFa attributes).</returns> 
         internal static MvcHtmlString RenderEntityAttributes(EntityModel entityModel)
         {
-            string markup = string.Empty;  
-            var compid = WebRequestContext.Localization.GetCmUri(entityModel.Id);
-            markup = string.Format("data-component-id=\"{0}\"", compid); 
+            string markup = string.Empty;
+            if (entityModel != null && entityModel.Id != null)
+            {
+                var compid = WebRequestContext.Localization.GetCmUri(entityModel.Id);
+                markup = string.Format("data-component-id=\"{0}\"", compid);
+            }
+            Log.Debug("RenderEntityAttributes markup '{0}'", markup);
             return new MvcHtmlString(markup);
         }
-      
-
-        /// <summary>
-        /// Generates semantic markup (HTML/RDFa attributes) for a given property of a given Entity Model.
-        /// </summary>
-        /// <param name="entityModel">The Entity Model which contains the property.</param>
-        /// <param name="propertyName">The name of the property.</param>
-        /// <param name="index">The index of the property value (for multi-value properties).</param>
-        /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
+  
+            /// <summary>
+            /// Generates semantic markup (HTML/RDFa attributes) for a given property of a given Entity Model.
+            /// </summary>
+            /// <param name="entityModel">The Entity Model which contains the property.</param>
+            /// <param name="propertyName">The name of the property.</param>
+            /// <param name="index">The index of the property value (for multi-value properties).</param>
+            /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
         internal static MvcHtmlString RenderPropertyAttributes(EntityModel entityModel, string propertyName, int index = 0)
         {
             PropertyInfo propertyInfo = entityModel.GetType().GetProperty(propertyName);
@@ -154,7 +160,7 @@ namespace Sdl.Web.Mvc.Html
                     }
                 }
             }
-
+            Log.Debug("RenderPropertyAttributes '{0}'", markup);
             return new MvcHtmlString(markup);
         }
 
@@ -167,6 +173,7 @@ namespace Sdl.Web.Mvc.Html
         {
             // TODO: "Region" is not a valid semantic type!
             string markup = $"typeof=\"{"Region"}\" data-region=\"{regionModel.Name}\"";
+            Log.Debug("RenderRegionAttributes '{0}'", markup);
             return new MvcHtmlString(markup);
         }
 
@@ -189,7 +196,7 @@ namespace Sdl.Web.Mvc.Html
             else
             {
                 // Property markup
-                EntityModel entityModel = (EntityModel) viewModel;
+                EntityModel entityModel = (EntityModel)viewModel;
                 string xpath;
                 if (entityModel.XpmPropertyMetadata != null && entityModel.XpmPropertyMetadata.TryGetValue(propertyName, out xpath))
                 {

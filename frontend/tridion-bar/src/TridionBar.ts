@@ -1,45 +1,61 @@
 
+import "./assets/css/style.css";
 export class TridionBar {
 
     public experienceSpaceBaseUrl: string
 
     constructor(baseUrl: string) {
-        this.experienceSpaceBaseUrl = baseUrl
+        this.experienceSpaceBaseUrl = baseUrl;
+        this.globalErrorHandlers()
     }
 
     public init(): void {
-        const actionButtons = document.querySelectorAll<HTMLButtonElement>("button[data-actions-type]")
-        actionButtons.forEach(btn => {
-            btn.addEventListener("click", (e) => this.initEditorLinks(e));
-        })
+        try {
+            const actionButtons = document.querySelectorAll<HTMLButtonElement>("button[data-actions-type]")
+            actionButtons.forEach(btn => {
+                btn.addEventListener("click", (e) => this.initEditorLinks(e));
+            })
+        } catch (error) {
+            this.logError('init', error);
+        }
     }
+
     public initEditorLinks(e: MouseEvent): void {
-        const btnType = e.currentTarget as HTMLButtonElement
-        const actionType = btnType.dataset.actionsType as string;
+        try {
+           
+            const btnType = e.currentTarget as HTMLButtonElement
+            const actionType = btnType.dataset.actionsType as string;
 
-        if (!actionType) return;
+            if (!actionType) return;
 
-        if (actionType === "page") {
-            const pageId = btnType.dataset.pageId;
-            if (pageId) {
-                const url = `${this.experienceSpaceBaseUrl}/${actionType}?item=${pageId}`
-                window.open(url, "_blank")
+            if (actionType === "page") {
+                const pageId = btnType.dataset.pageId;
+                if (pageId) {
+                    const url = `${this.experienceSpaceBaseUrl}/${actionType}?item=${pageId}`
+                    window.open(url, "_blank")
+                }
+            } else {
+                this.injectEditorLinks("[data-component-id]", "componentId", actionType)
             }
-        } else {
-            this.injectEditorLinks("[data-component-id]", "componentId", actionType)
+        } catch (error) {
+            this.logError('initEditorLinks', error);
         }
     }
 
     private injectEditorLinks(selector: string, dataKey: string, type: string): void {
-        if (!this.experienceSpaceBaseUrl) return;
+        try {
+            if (!this.experienceSpaceBaseUrl) return;
 
-        const elements = document.querySelectorAll<HTMLElement>(selector);
-        elements.forEach(el => {
-            const tcmid = el.dataset[dataKey]
-            if (tcmid) {
-                this.createExperienceSpaceEditorLink(el, tcmid, type)
-            }
-        })
+            const elements = document.querySelectorAll<HTMLElement>(selector);
+            elements.forEach(el => {
+                const tcmid = el.dataset[dataKey]
+                if (tcmid) {
+                    this.createExperienceSpaceEditorLink(el, tcmid, type)
+                }
+            })
+        } catch (error) {
+            this.logError('injectLinks', error);
+        }
     }
 
     public static editIconSVG: string = `
@@ -50,21 +66,24 @@ export class TridionBar {
         `;
 
     public createExperienceSpaceEditorLink(container: HTMLElement, tcmid: string, type: string) {
+        try {
+            // Check if a edit link already exists
+            const existingLink = container.querySelector(`a.xpm-highlight[title="${tcmid}"]`);
+            if (existingLink !== null) {
+                return this.toggleLink(existingLink)
+            }
 
-        // Check if a edit link already exists
-        const existingLink = container.querySelector(`a.xpm-highlight[title="${tcmid}"]`);
-        if (existingLink !== null) {
-            return this.toggleLink(existingLink)
+            const exerienceSpaceLink = document.createElement("a");
+            exerienceSpaceLink.href = `${this.experienceSpaceBaseUrl}/${type}?item=${tcmid}&tab=general.content`;
+            exerienceSpaceLink.title = tcmid;
+            exerienceSpaceLink.target = "_blank";
+            exerienceSpaceLink.classList.add("xpm-highlight");
+            exerienceSpaceLink.innerHTML = TridionBar.editIconSVG
+            container.style.position = "relative"
+            container.appendChild(exerienceSpaceLink) // append new link
+        } catch (error) {
+            this.logError('createExperienceSpaceEditorLink', error);
         }
-
-        const exerienceSpaceLink = document.createElement("a");
-        exerienceSpaceLink.href = `${this.experienceSpaceBaseUrl}/${type}?item=${tcmid}&tab=general.content`;
-        exerienceSpaceLink.title = tcmid;
-        exerienceSpaceLink.target = "_blank";
-        exerienceSpaceLink.classList.add("xpm-highlight");
-        exerienceSpaceLink.innerHTML = TridionBar.editIconSVG
-
-        container.appendChild(exerienceSpaceLink) // append new link
     }
 
     public toggleLink(existingLink: Element): void {
@@ -77,6 +96,26 @@ export class TridionBar {
 
             return;
         }
+    }
+    public logError(context: string, error: unknown): void {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error(`[${context}] ❌ Error:`, message);
+    }
+    private globalErrorHandlers(): void {
+        window.onerror = (message, source, lineno, colno, error) => {
+            this.logError('window.onerror', {
+                message,
+                source,
+                lineno,
+                colno,
+                error
+            });
+            return true;
+        };
+
+        window.onunhandledrejection = (event) => {
+            this.logError('window.onunhandledrejection', event.reason);
+        };
     }
 }
 
