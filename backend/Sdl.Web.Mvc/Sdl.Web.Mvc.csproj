@@ -129,6 +129,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /Y /I "$(TargetDir)$(TargetFileName)" "..\..\..\..\xpm-minimal-deployables\backend\bin\"
+REM Copy Views folder
+robocopy "$(ProjectDir)Reference_dll\Views" "..\..\..\..\xpm-minimal-deployables\backend\Views" /E /NFL /NDL /NJH /NJS /NC /NS
+exit 0</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

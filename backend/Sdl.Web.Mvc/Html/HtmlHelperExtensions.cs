@@ -471,7 +471,8 @@ namespace Sdl.Web.Mvc.Html
             string markup = string.Empty; 
             var model = (PageModel)htmlHelper.ViewData.Model;
             var pageId = WebRequestContext.Localization.GetCmUri(model.Id, (int)ItemType.Page);
-           // markup = string.Format("<!-- data-page-Id=\"{0}\" -->", pageId);  
+            // markup = string.Format("<!-- data-page-Id=\"{0}\" -->", pageId);  
+            Log.Debug("GetPageTcmUri PageId '{0}'", pageId);
             return new MvcHtmlString(pageId);
         }
 
